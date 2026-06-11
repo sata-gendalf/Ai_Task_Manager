@@ -1,0 +1,22 @@
+# Node.js
+node_modules/
+npm-debug.log
+
+# Переменные среды
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# React
+dist/
+build/
+
+# Операционная система
+.DS_Store
+Thumbs.db
+
+# Редактор
+.vscode/
