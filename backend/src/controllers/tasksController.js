@@ -1,6 +1,29 @@
+const axios = require('axios');
 const pool = require('../db/pool');
 
 const allowedStatuses = ['todo', 'in_progress', 'done'];
+
+const analyzeTaskText = async (title) => {
+  try {
+    const pythonServiceUrl = process.env.PYTHON_SERVICE_URL || 'http://localhost:8000';
+
+    const response = await axios.post(`${pythonServiceUrl}/analyze`, {
+      text: title,
+    });
+
+    return {
+      priority: response.data.priority || 'medium',
+      category: response.data.category || 'general',
+    };
+  } catch (error) {
+    console.error('Python service error:', error.message);
+
+    return {
+      priority: 'medium',
+      category: 'general',
+    };
+  }
+};
 
 const getTasks = async (req, res) => {
   try {
@@ -28,7 +51,7 @@ const createTask = async (req, res) => {
     const userId = req.user.id;
     const { title, status } = req.body;
 
-    if (!title) {
+    if (!title || !title.trim()) {
       return res.status(400).json({
         message: 'Task title is required',
       });
@@ -42,16 +65,25 @@ const createTask = async (req, res) => {
       });
     }
 
+    const analysis = await analyzeTaskText(title);
+
     const newTask = await pool.query(
       `INSERT INTO tasks (user_id, title, status, priority, category)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, title, status, priority, category, created_at, updated_at`,
-      [userId, title, taskStatus, 'medium', 'general']
+      [
+        userId,
+        title,
+        taskStatus,
+        analysis.priority,
+        analysis.category,
+      ]
     );
 
     return res.status(201).json({
       message: 'Task created successfully',
       task: newTask.rows[0],
+      analysis,
     });
   } catch (error) {
     return res.status(500).json({
