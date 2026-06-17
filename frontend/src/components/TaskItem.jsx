@@ -1,13 +1,44 @@
 import { useTasks } from '../contexts/TasksContext';
 import PriorityBadge from './PriorityBadge';
-import { formatDate } from '../utils/formatDate';
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'Не указано';
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Не указано';
+
+  return date.toLocaleDateString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
+
+const formatCategory = (category) => {
+  if (!category) return '—';
+  const map = {
+    'business': 'Работа',
+    'study': 'Учёба',
+    'personal': 'Личное',
+    'general': 'Общее'
+  };
+  return map[category.toLowerCase()] || category;
+};
 
 const TaskItem = ({ task }) => {
   const { updateTask, deleteTask } = useTasks();
 
-  const toggleStatus = () => {
-    const newStatus = task.status === 'completed' ? 'active' : 'completed';
-    updateTask(task.id, { status: newStatus });
+  const toggleStatus = async () => {
+    const currentStatus = task.status || 'todo';
+    const newStatus = currentStatus === 'done' ? 'todo' : 'done';
+
+    try {
+      await updateTask(task.id, { status: newStatus });
+    } catch (error) {
+      console.error('Ошибка при изменении статуса:', error);
+      alert('Не удалось изменить статус задачи');
+    }
   };
 
   return (
@@ -15,15 +46,18 @@ const TaskItem = ({ task }) => {
       <h3>{task.title}</h3>
       <div>
         <strong>Приоритет:</strong> <PriorityBadge priority={task.priority} /><br />
-        <strong>Категория:</strong> {task.category || '—'}<br />
-        <strong>Статус:</strong> {task.status === 'completed' ? '✅ Завершена' : '🟡 В работе'}<br />
-        <strong>Создана:</strong> {formatDate(task.createdAt)}
+        <strong>Категория:</strong> {formatCategory(task.category)}<br />
+        <strong>Статус:</strong> {task.status === 'done' ? '✅ Завершена' : '🟡 В работе'}<br />
+        <strong>Создана:</strong> {formatDate(task.created_at || task.createdAt)}
       </div>
       <div style={{ marginTop: '8px' }}>
-        <button onClick={toggleStatus}>
-          {task.status === 'completed' ? 'Вернуть в работу' : 'Завершить'}
+        <button onClick={toggleStatus} style={{ marginRight: '8px' }}>
+          {task.status === 'done' ? 'Вернуть в работу' : 'Завершить'}
         </button>
-        <button onClick={() => deleteTask(task.id)} style={{ marginLeft: '8px', backgroundColor: '#ff6666' }}>
+        <button 
+          onClick={() => deleteTask(task.id)} 
+          style={{ backgroundColor: '#ff6666', color: 'white' }}
+        >
           Удалить
         </button>
       </div>

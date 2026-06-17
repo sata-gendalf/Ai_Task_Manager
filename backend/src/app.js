@@ -36,6 +36,12 @@ app.get('/db-test', async (req, res) => {
   }
 });
 
+app.use((req, res) => {
+  res.status(404).json({
+    message: 'Route not found',
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

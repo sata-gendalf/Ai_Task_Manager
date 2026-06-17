@@ -17,7 +17,6 @@ const analyzeTaskText = async (title) => {
     };
   } catch (error) {
     console.error('Python service error:', error.message);
-
     return {
       priority: 'medium',
       category: 'general',
@@ -52,17 +51,13 @@ const createTask = async (req, res) => {
     const { title, status } = req.body;
 
     if (!title || !title.trim()) {
-      return res.status(400).json({
-        message: 'Task title is required',
-      });
+      return res.status(400).json({ message: 'Task title is required' });
     }
 
     const taskStatus = status || 'todo';
 
     if (!allowedStatuses.includes(taskStatus)) {
-      return res.status(400).json({
-        message: 'Invalid task status',
-      });
+      return res.status(400).json({ message: 'Invalid task status' });
     }
 
     const analysis = await analyzeTaskText(title);
@@ -71,13 +66,7 @@ const createTask = async (req, res) => {
       `INSERT INTO tasks (user_id, title, status, priority, category)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING id, title, status, priority, category, created_at, updated_at`,
-      [
-        userId,
-        title,
-        taskStatus,
-        analysis.priority,
-        analysis.category,
-      ]
+      [userId, title, taskStatus, analysis.priority, analysis.category]
     );
 
     return res.status(201).json({
@@ -100,15 +89,11 @@ const updateTask = async (req, res) => {
     const { title, status } = req.body;
 
     if (!title && !status) {
-      return res.status(400).json({
-        message: 'Title or status is required for update',
-      });
+      return res.status(400).json({ message: 'Title or status is required for update' });
     }
 
     if (status && !allowedStatuses.includes(status)) {
-      return res.status(400).json({
-        message: 'Invalid task status',
-      });
+      return res.status(400).json({ message: 'Invalid task status' });
     }
 
     const updatedTask = await pool.query(
@@ -123,9 +108,7 @@ const updateTask = async (req, res) => {
     );
 
     if (updatedTask.rows.length === 0) {
-      return res.status(404).json({
-        message: 'Task not found',
-      });
+      return res.status(404).json({ message: 'Task not found' });
     }
 
     return res.json({
@@ -153,9 +136,7 @@ const deleteTask = async (req, res) => {
     );
 
     if (deletedTask.rows.length === 0) {
-      return res.status(404).json({
-        message: 'Task not found',
-      });
+      return res.status(404).json({ message: 'Task not found' });
     }
 
     return res.json({

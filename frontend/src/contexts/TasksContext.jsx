@@ -23,18 +23,35 @@ export const TasksProvider = ({ children }) => {
   };
 
   const createTask = async (title) => {
-    const newTask = await tasksApi.createTask(title);
-    setTasks(prev => [newTask, ...prev]);
+    try {
+      const newTask = await tasksApi.createTask(title);
+      
+      // Важно: обновляем список правильно
+      setTasks(prev => [newTask.task || newTask, ...prev]);
+      
+      return newTask;
+    } catch (error) {
+      console.error('Ошибка создания задачи', error);
+      throw error;
+    }
   };
 
   const updateTask = async (id, updates) => {
-    const updated = await tasksApi.updateTask(id, updates);
-    setTasks(prev => prev.map(task => (task.id === id ? updated : task)));
+    try {
+      const updated = await tasksApi.updateTask(id, updates);
+      setTasks(prev => prev.map(task => (task.id === id ? (updated.task || updated) : task)));
+    } catch (error) {
+      console.error('Ошибка обновления задачи', error);
+    }
   };
 
   const deleteTask = async (id) => {
-    await tasksApi.deleteTask(id);
-    setTasks(prev => prev.filter(task => task.id !== id));
+    try {
+      await tasksApi.deleteTask(id);
+      setTasks(prev => prev.filter(task => task.id !== id));
+    } catch (error) {
+      console.error('Ошибка удаления задачи', error);
+    }
   };
 
   useEffect(() => {
@@ -46,7 +63,14 @@ export const TasksProvider = ({ children }) => {
   }, [token]);
 
   return (
-    <TasksContext.Provider value={{ tasks, loading, createTask, updateTask, deleteTask, loadTasks }}>
+    <TasksContext.Provider value={{ 
+      tasks, 
+      loading, 
+      createTask, 
+      updateTask, 
+      deleteTask, 
+      loadTasks 
+    }}>
       {children}
     </TasksContext.Provider>
   );
