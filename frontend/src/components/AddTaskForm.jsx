@@ -13,15 +13,15 @@ const AddTaskForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
       <input
         type="text"
         placeholder="Новая задача (например, «Подготовить отчёт к пятнице»)"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        style={{ width: '300px' }}
+        style={{ flex: 1 }}
       />
-      <button type="submit">Добавить</button>
+      <button type="submit" className="btn btn-primary">Добавить</button>
     </form>
   );
 };
