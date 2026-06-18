@@ -21,20 +21,20 @@ const LoginForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="card">
       <h2>Вход</h2>
-      <div>
+      <div className="form-group">
         <label>Email:</label>
         <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
       </div>
-      <div>
+      <div className="form-group">
         <label>Пароль:</label>
         <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
       </div>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <button type="submit">Войти</button>
-      <p>
-        Нет аккаунта? <a href="/register">Зарегистрироваться</a>
+      {error && <p className="error">{error}</p>}
+      <button type="submit" className="btn btn-primary">Войти</button>
+      <p style={{ marginTop: '12px' }}>
+        Нет аккаунта? <a href="/register" className="link">Зарегистрироваться</a>
       </p>
     </form>
   );
