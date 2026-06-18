@@ -1,5 +1,5 @@
 const { ValidationError } = require('./errors');
-const { PASSWORD_MIN_LENGTH } = require('../config/constants');
+const { PASSWORD_MIN_LENGTH, TASK_STATUSES, TASK_PRIORITIES } = require('../config/constants');
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,8 +53,8 @@ const validateTaskCreate = (data) => {
     errors.title = 'Название не может быть длиннее 255 символов';
   }
 
-  if (data.priority && !['low', 'medium', 'high'].includes(data.priority)) {
-    errors.priority = 'Некорректный приоритет (low, medium, high)';
+  if (data.priority && !TASK_PRIORITIES.includes(data.priority)) {
+    errors.priority = `Некорректный приоритет (${TASK_PRIORITIES.join(', ')})`;
   }
 
   if (Object.keys(errors).length > 0) {
@@ -71,12 +71,12 @@ const validateTaskUpdate = (data) => {
     throw new ValidationError('Название не может быть длиннее 255 символов');
   }
 
-  if (data.priority && !['low', 'medium', 'high'].includes(data.priority)) {
-    throw new ValidationError('Некорректный приоритет (low, medium, high)');
+  if (data.priority && !TASK_PRIORITIES.includes(data.priority)) {
+    throw new ValidationError(`Некорректный приоритет (${TASK_PRIORITIES.join(', ')})`);
   }
 
-  if (data.status && !['todo', 'in_progress', 'completed'].includes(data.status)) {
-    throw new ValidationError('Некорректный статус (todo, in_progress, completed)');
+  if (data.status && !TASK_STATUSES.includes(data.status)) {
+    throw new ValidationError(`Некорректный статус (${TASK_STATUSES.join(', ')})`);
   }
 };
 

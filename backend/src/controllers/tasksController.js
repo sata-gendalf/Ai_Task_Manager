@@ -1,7 +1,9 @@
 const axios = require('axios');
 const pool = require('../db/pool');
-
-const allowedStatuses = ['todo', 'in_progress', 'done'];
+const logger = require('../utils/logger');
+const { validateTaskCreate, validateTaskUpdate } = require('../utils/validators');
+const { TASK_STATUSES } = require('../config/constants');
+const { NotFoundError } = require('../utils/errors');
 
 const analyzeTaskText = async (title) => {
   try {
@@ -9,22 +11,26 @@ const analyzeTaskText = async (title) => {
 
     const response = await axios.post(`${pythonServiceUrl}/analyze`, {
       text: title,
+    }, {
+      timeout: 5000
     });
 
     return {
       priority: response.data.priority || 'medium',
       category: response.data.category || 'general',
+      analyzed: true
     };
   } catch (error) {
-    console.error('Python service error:', error.message);
+    logger.warn('Python service unavailable, using defaults', error.message);
     return {
       priority: 'medium',
       category: 'general',
+      analyzed: false
     };
   }
 };
 
-const getTasks = async (req, res) => {
+const getTasks = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
@@ -38,26 +44,22 @@ const getTasks = async (req, res) => {
 
     return res.json(tasks.rows);
   } catch (error) {
-    return res.status(500).json({
-      message: 'Failed to get tasks',
-      error: error.message,
-    });
+    logger.error('Get tasks error', error);
+    next(error);
   }
 };
 
-const createTask = async (req, res) => {
+const createTask = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { title, status } = req.body;
 
-    if (!title || !title.trim()) {
-      return res.status(400).json({ message: 'Task title is required' });
-    }
+    validateTaskCreate({ title });
 
     const taskStatus = status || 'todo';
 
-    if (!allowedStatuses.includes(taskStatus)) {
-      return res.status(400).json({ message: 'Invalid task status' });
+    if (!TASK_STATUSES.includes(taskStatus)) {
+      return res.status(400).json({ message: 'Некорректный статус задачи' });
     }
 
     const analysis = await analyzeTaskText(title);
@@ -70,30 +72,36 @@ const createTask = async (req, res) => {
     );
 
     return res.status(201).json({
-      message: 'Task created successfully',
+      message: 'Задача создана успешно',
       task: newTask.rows[0],
-      analysis,
+      analysis: {
+        priority: analysis.priority,
+        category: analysis.category,
+        analyzed: analysis.analyzed
+      }
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Failed to create task',
-      error: error.message,
-    });
+    logger.error('Create task error', error);
+    next(error);
   }
 };
 
-const updateTask = async (req, res) => {
+const updateTask = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const taskId = req.params.id;
     const { title, status } = req.body;
 
     if (!title && !status) {
-      return res.status(400).json({ message: 'Title or status is required for update' });
+      return res.status(400).json({ message: 'Требуется название или статус для обновления' });
     }
 
-    if (status && !allowedStatuses.includes(status)) {
-      return res.status(400).json({ message: 'Invalid task status' });
+    if (title) {
+      validateTaskUpdate({ title });
+    }
+
+    if (status && !TASK_STATUSES.includes(status)) {
+      return res.status(400).json({ message: 'Некорректный статус задачи' });
     }
 
     const updatedTask = await pool.query(
@@ -108,22 +116,20 @@ const updateTask = async (req, res) => {
     );
 
     if (updatedTask.rows.length === 0) {
-      return res.status(404).json({ message: 'Task not found' });
+      throw new NotFoundError('Задача не найдена');
     }
 
     return res.json({
-      message: 'Task updated successfully',
+      message: 'Задача обновлена успешно',
       task: updatedTask.rows[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Failed to update task',
-      error: error.message,
-    });
+    logger.error('Update task error', error);
+    next(error);
   }
 };
 
-const deleteTask = async (req, res) => {
+const deleteTask = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const taskId = req.params.id;
@@ -136,18 +142,16 @@ const deleteTask = async (req, res) => {
     );
 
     if (deletedTask.rows.length === 0) {
-      return res.status(404).json({ message: 'Task not found' });
+      throw new NotFoundError('Задача не найдена');
     }
 
     return res.json({
-      message: 'Task deleted successfully',
+      message: 'Задача удалена успешно',
       task: deletedTask.rows[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Failed to delete task',
-      error: error.message,
-    });
+    logger.error('Delete task error', error);
+    next(error);
   }
 };
 
