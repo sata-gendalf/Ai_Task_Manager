@@ -1,22 +1,74 @@
-# Node.js
+# Зависимости
 node_modules/
-npm-debug.log
+venv/
+.venv/
+env/
 
 # Переменные среды
 .env
+.env.local
+.env.*.local
+
+# Логи
+npm-debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
 
 # Python
 __pycache__/
-*.pyc
-venv/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+.pytest_cache/
+.coverage
 
 # React
 dist/
 build/
+.next/
+out/
 
-# Операционная система
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
 Thumbs.db
+*.sublime-project
+*.sublime-workspace
 
-# Редактор
-.vscode/
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Временные файлы
+*.tmp
+*.temp
+.cache/
+
+# Базы данных (локальные)
+*.db
+*.sqlite
+*.sqlite3

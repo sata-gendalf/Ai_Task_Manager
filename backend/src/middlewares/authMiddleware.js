@@ -1,11 +1,19 @@
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 const authenticateToken = (req, res, next) => {
+  if (!process.env.JWT_SECRET) {
+    logger.error('JWT_SECRET not configured');
+    return res.status(500).json({
+      message: 'Внутренняя ошибка сервера',
+    });
+  }
+
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
     return res.status(401).json({
-      message: 'Authorization header is missing',
+      message: 'Требуется заголовок авторизации',
     });
   }
 
@@ -13,7 +21,7 @@ const authenticateToken = (req, res, next) => {
 
   if (!token) {
     return res.status(401).json({
-      message: 'Token is missing',
+      message: 'Токен не найден',
     });
   }
 
@@ -27,8 +35,9 @@ const authenticateToken = (req, res, next) => {
 
     next();
   } catch (error) {
+    logger.warn('Invalid or expired token', error.message);
     return res.status(401).json({
-      message: 'Invalid or expired token',
+      message: 'Неправильный или истекший токен',
     });
   }
 };
