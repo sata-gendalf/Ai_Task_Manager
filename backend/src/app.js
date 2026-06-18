@@ -18,8 +18,8 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-app.use('/auth', authRoutes);
-app.use('/tasks', tasksRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/tasks', tasksRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'AI Task Assistant backend is running ✅' });

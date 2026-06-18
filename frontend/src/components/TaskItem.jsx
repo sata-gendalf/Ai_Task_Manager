@@ -18,9 +18,10 @@ const formatDate = (dateString) => {
 const formatCategory = (category) => {
   if (!category) return '—';
   const map = {
-    'business': 'Работа',
+    'work': 'Работа',
     'study': 'Учёба',
     'personal': 'Личное',
+    'health': 'Здоровье',
     'general': 'Общее'
   };
   return map[category.toLowerCase()] || category;
@@ -37,26 +38,37 @@ const TaskItem = ({ task }) => {
       await updateTask(task.id, { status: newStatus });
     } catch (error) {
       console.error('Ошибка при изменении статуса:', error);
-      alert('Не удалось изменить статус задачи');
+      alert(error.message || 'Не удалось изменить статус задачи');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm('Вы уверены что хотите удалить эту задачу?')) {
+      try {
+        await deleteTask(task.id);
+      } catch (error) {
+        console.error('Ошибка при удалении:', error);
+        alert(error.message || 'Не удалось удалить задачу');
+      }
     }
   };
 
   return (
-    <div className={`task-item ${task.status === 'completed' ? 'completed' : ''}`}>
+    <div className={`task-item ${task.status === 'done' ? 'completed' : ''}`}>
       <div className="task-header">
         <span className="task-title">{task.title}</span>
         <PriorityBadge priority={task.priority} />
       </div>
       <div className="task-meta">
-        <span>Категория: {task.category || '—'}</span>
-        <span>Статус: {task.status === 'completed' ? '✅ Завершена' : '🟡 В работе'}</span>
-        <span>Создана: {formatDate(task.createdAt)}</span>
+        <span>Категория: {formatCategory(task.category)}</span>
+        <span>Статус: {task.status === 'done' ? '✅ Завершена' : '🟡 В работе'}</span>
+        <span>Создана: {formatDate(task.created_at)}</span>
       </div>
       <div className="task-actions">
         <button onClick={toggleStatus} className="btn btn-outline">
-          {task.status === 'completed' ? 'Вернуть' : 'Завершить'}
+          {task.status === 'done' ? 'Вернуть' : 'Завершить'}
         </button>
-        <button onClick={() => deleteTask(task.id)} className="btn btn-danger">Удалить</button>
+        <button onClick={handleDelete} className="btn btn-danger">Удалить</button>
       </div>
     </div>
   );

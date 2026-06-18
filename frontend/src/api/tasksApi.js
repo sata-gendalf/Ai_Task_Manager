@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getErrorMessage } from './errorHandler';
 
 const API_BASE = '/api';
 
@@ -18,20 +19,36 @@ api.interceptors.request.use((config) => {
 });
 
 export const getTasks = async () => {
-  const res = await api.get('/tasks');
-  return res.data;
+  try {
+    const res = await api.get('/tasks');
+    return res.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 };
 
 export const createTask = async (title) => {
-  const res = await api.post('/tasks', { title });
-  return res.data;
+  try {
+    const res = await api.post('/tasks', { title });
+    return res.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 };
 
 export const updateTask = async (id, updates) => {
-  const res = await api.put(`/tasks/${id}`, updates);
-  return res.data;
+  try {
+    const res = await api.put(`/tasks/${id}`, updates);
+    return res.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 };
 
 export const deleteTask = async (id) => {
-  await api.delete(`/tasks/${id}`);
+  try {
+    await api.delete(`/tasks/${id}`);
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 };

@@ -24,11 +24,12 @@ export const TasksProvider = ({ children }) => {
 
   const createTask = async (title) => {
     try {
-      const newTask = await tasksApi.createTask(title);
+      const response = await tasksApi.createTask(title);
+      const newTask = response.task || response;
       
-      setTasks(prev => [newTask.task || newTask, ...prev]);
+      setTasks(prev => [newTask, ...prev]);
       
-      return newTask;
+      return response;
     } catch (error) {
       console.error('Ошибка создания задачи', error);
       throw error;
@@ -37,10 +38,13 @@ export const TasksProvider = ({ children }) => {
 
   const updateTask = async (id, updates) => {
     try {
-      const updated = await tasksApi.updateTask(id, updates);
-      setTasks(prev => prev.map(task => (task.id === id ? (updated.task || updated) : task)));
+      const response = await tasksApi.updateTask(id, updates);
+      const updatedTask = response.task || response;
+      
+      setTasks(prev => prev.map(task => (task.id === id ? updatedTask : task)));
     } catch (error) {
       console.error('Ошибка обновления задачи', error);
+      throw error;
     }
   };
 
@@ -50,6 +54,7 @@ export const TasksProvider = ({ children }) => {
       setTasks(prev => prev.filter(task => task.id !== id));
     } catch (error) {
       console.error('Ошибка удаления задачи', error);
+      throw error;
     }
   };
 

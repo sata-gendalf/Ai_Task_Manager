@@ -31,9 +31,26 @@ const register = async (req, res, next) => {
       [email, passwordHash]
     );
 
+    const user = newUser.rows[0];
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: JWT_EXPIRY,
+      }
+    );
+
     return res.status(201).json({
       message: 'Пользователь зарегистрирован успешно',
-      user: newUser.rows[0],
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+      },
     });
   } catch (error) {
     logger.error('Registration error', error);

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getErrorMessage } from './errorHandler';
 
 const API_BASE = '/api';
 
@@ -10,11 +11,19 @@ const api = axios.create({
 });
 
 export const register = async (email, password) => {
-  const res = await api.post('/auth/register', { email, password });
-  return res.data;
+  try {
+    const res = await api.post('/auth/register', { email, password });
+    return res.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 };
 
 export const login = async (email, password) => {
-  const res = await api.post('/auth/login', { email, password });
-  return res.data;
+  try {
+    const res = await api.post('/auth/login', { email, password });
+    return res.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
 };
