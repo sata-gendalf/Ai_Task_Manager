@@ -9,8 +9,10 @@ const DashboardPage = () => {
 
   return (
     <div>
-      <h1>Мои задачи</h1>
-      <button onClick={logout}>Выйти</button>
+      <div className="page-header">
+        <h1>Мои задачи</h1>
+        <button onClick={logout} className="btn btn-outline">Выйти</button>
+      </div>
       <AddTaskForm />
       {loading && <p>Загрузка...</p>}
       <TaskList tasks={tasks} />
