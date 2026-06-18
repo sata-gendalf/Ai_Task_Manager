@@ -1,22 +1,15 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db/pool');
+const logger = require('../utils/logger');
+const { validateRegistration, validateLogin } = require('../utils/validators');
+const { PASSWORD_MIN_LENGTH, JWT_EXPIRY, BCRYPT_ROUNDS } = require('../config/constants');
 
-const register = async (req, res) => {
+const register = async (req, res, next) => {
   try {
+    validateRegistration(req.body);
+
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({
-        message: 'Email and password are required',
-      });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({
-        message: 'Password must be at least 6 characters long',
-      });
-    }
 
     const existingUser = await pool.query(
       'SELECT id FROM users WHERE email = $1',
@@ -25,12 +18,11 @@ const register = async (req, res) => {
 
     if (existingUser.rows.length > 0) {
       return res.status(409).json({
-        message: 'User with this email already exists',
+        message: 'Такие данные уже существуют в системе.',
       });
     }
 
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
     const newUser = await pool.query(
       `INSERT INTO users (email, password_hash)
@@ -40,26 +32,20 @@ const register = async (req, res) => {
     );
 
     return res.status(201).json({
-      message: 'User registered successfully',
+      message: 'Пользователь зарегистрирован успешно',
       user: newUser.rows[0],
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Registration failed',
-      error: error.message,
-    });
+    logger.error('Registration error', error);
+    next(error);
   }
 };
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
+    validateLogin(req.body);
+    
     const { email, password } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({
-        message: 'Email and password are required',
-      });
-    }
 
     const userResult = await pool.query(
       'SELECT id, email, password_hash FROM users WHERE email = $1',
@@ -68,7 +54,7 @@ const login = async (req, res) => {
 
     if (userResult.rows.length === 0) {
       return res.status(401).json({
-        message: 'Invalid email or password',
+        message: 'Неправильный email или пароль',
       });
     }
 
@@ -81,7 +67,7 @@ const login = async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(401).json({
-        message: 'Invalid email or password',
+        message: 'Неправильный email или пароль',
       });
     }
 
@@ -92,12 +78,12 @@ const login = async (req, res) => {
       },
       process.env.JWT_SECRET,
       {
-        expiresIn: '24h',
+        expiresIn: JWT_EXPIRY,
       }
     );
 
     return res.json({
-      message: 'Login successful',
+      message: 'Вход успешен',
       token,
       user: {
         id: user.id,
@@ -105,10 +91,8 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Login failed',
-      error: error.message,
-    });
+    logger.error('Login error', error);
+    next(error);
   }
 };
 

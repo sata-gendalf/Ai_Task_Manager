@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE = '/api';   // будет проксироваться на http://localhost:5000
+const API_BASE = '/api';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -9,7 +9,6 @@ const api = axios.create({
   }
 });
 
-// Добавляем токен автоматически
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {

@@ -26,7 +26,6 @@ export const TasksProvider = ({ children }) => {
     try {
       const newTask = await tasksApi.createTask(title);
       
-      // Важно: обновляем список правильно
       setTasks(prev => [newTask.task || newTask, ...prev]);
       
       return newTask;
