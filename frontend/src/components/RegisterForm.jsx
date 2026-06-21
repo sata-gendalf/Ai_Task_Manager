@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const RegisterForm = () => {
   const [email, setEmail] = useState('');
@@ -14,7 +14,7 @@ const RegisterForm = () => {
     setError('');
     try {
       await register(email, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Ошибка регистрации');
     }
@@ -34,7 +34,7 @@ const RegisterForm = () => {
       {error && <p className="error">{error}</p>}
       <button type="submit" className="btn btn-primary">Зарегистрироваться</button>
       <p style={{ marginTop: '12px' }}>
-        Уже есть аккаунт? <a href="/login" className="link">Войти</a>
+        Уже есть аккаунт? <Link to="/login" className="link">Войти</Link>
       </p>
     </form>
   );

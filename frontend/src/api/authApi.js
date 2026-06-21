@@ -27,3 +27,14 @@ export const login = async (email, password) => {
     throw new Error(getErrorMessage(error));
   }
 };
+
+export const getMe = async (token) => {
+  try {
+    const res = await api.get('/auth/me', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
+  }
+};

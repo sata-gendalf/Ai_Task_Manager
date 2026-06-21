@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
@@ -14,7 +14,7 @@ const LoginForm = () => {
     setError('');
     try {
       await login(email, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Ошибка входа');
     }
@@ -34,7 +34,7 @@ const LoginForm = () => {
       {error && <p className="error">{error}</p>}
       <button type="submit" className="btn btn-primary">Войти</button>
       <p style={{ marginTop: '12px' }}>
-        Нет аккаунта? <a href="/register" className="link">Зарегистрироваться</a>
+        Нет аккаунта? <Link to="/register" className="link">Зарегистрироваться</Link>
       </p>
     </form>
   );

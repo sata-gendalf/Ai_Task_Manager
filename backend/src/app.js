@@ -22,7 +22,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tasks', tasksRoutes);
 
 app.get('/', (req, res) => {
-  res.json({ message: 'AI Task Assistant backend is running ✅' });
+  res.json({ message: 'Task Manager backend is running ✅' });
 });
 
 app.get('/db-test', async (req, res, next) => {

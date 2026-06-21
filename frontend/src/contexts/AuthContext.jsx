@@ -5,35 +5,58 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const clearSession = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+    setUser(null);
+  };
+
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-    }
-    setLoading(false);
+    const restoreSession = async () => {
+      const storedToken = localStorage.getItem('token');
+
+      if (!storedToken) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const data = await authApi.getMe(storedToken);
+        setToken(storedToken);
+        setUser(data.user);
+      } catch {
+        clearSession();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    restoreSession();
   }, []);
 
   const register = async (email, password) => {
     const data = await authApi.register(email, password);
     localStorage.setItem('token', data.token);
     setToken(data.token);
+    setUser(data.user);
   };
 
   const login = async (email, password) => {
     const data = await authApi.login(email, password);
     localStorage.setItem('token', data.token);
     setToken(data.token);
+    setUser(data.user);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
+    clearSession();
   };
 
   return (
-    <AuthContext.Provider value={{ token, loading, register, login, logout }}>
+    <AuthContext.Provider value={{ token, user, loading, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

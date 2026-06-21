@@ -72,3 +72,12 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+
+# Материалы практики (не часть приложения)
+generate_report.py
+*.docx
+~$*
+_screens_list.txt
+ОТЧЕТ_*.txt
+Проверка_*.txt
+Структура_отчета.txt

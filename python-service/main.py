@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-app = FastAPI(title="AI Task Analyzer")
+app = FastAPI(title="Task Analyzer")
 
 class AnalyzeRequest(BaseModel):
     text: str
@@ -36,16 +36,15 @@ def analyze_priority(text: str) -> str:
 def analyze_category(text: str) -> str:
     text_lower = text.lower()
 
-    if any(word in text_lower for word in ["клиент", "презентация", "отчет", "проект", "встреча", "договор", "заказ", "работ", "офис", "началь"]):
-        return "Работа"
-    elif any(word in text_lower for word in ["учеба", "практика", "экзамен", "зачет", "курсовая", "лабораторная", "домашка", "студ", "универ", "школ"]):
-        return "Учёба"
-    elif any(word in text_lower for word in ["купить", "дом", "уборка", "магазин", "продукт", "семь", "ребёнок", "личн"]):
-        return "Личное"
-    elif any(word in text_lower for word in ["спорт", "врач", "здоров", "тренир", "фитнес"]):
-        return "Здоровье"
-    else:
-        return "Общее"
+    if any(word in text_lower for word in ["клиент", "презентация", "отчет", "проект", "встреча", "договор", "заказ", "работ", "офис", "началь", "business"]):
+        return "work"
+    if any(word in text_lower for word in ["учеба", "практика", "экзамен", "зачет", "курсовая", "лабораторная", "домашка", "студ", "универ", "школ"]):
+        return "study"
+    if any(word in text_lower for word in ["купить", "дом", "уборка", "магазин", "продукт", "семь", "ребёнок", "личн"]):
+        return "personal"
+    if any(word in text_lower for word in ["спорт", "врач", "здоров", "тренир", "фитнес"]):
+        return "health"
+    return "general"
 
 
 @app.get("/")

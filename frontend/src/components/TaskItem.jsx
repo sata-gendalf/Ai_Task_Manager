@@ -1,38 +1,19 @@
 import { useTasks } from '../contexts/TasksContext';
 import PriorityBadge from './PriorityBadge';
-
-const formatDate = (dateString) => {
-  if (!dateString) return 'Не указано';
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return 'Не указано';
-
-  return date.toLocaleDateString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
-const formatCategory = (category) => {
-  if (!category) return '—';
-  const map = {
-    'work': 'Работа',
-    'study': 'Учёба',
-    'personal': 'Личное',
-    'health': 'Здоровье',
-    'general': 'Общее'
-  };
-  return map[category.toLowerCase()] || category;
-};
+import { formatDate } from '../utils/formatDate';
+import {
+  formatCategory,
+  formatStatus,
+  getNextStatus,
+  getStatusActionLabel,
+} from '../utils/taskLabels';
 
 const TaskItem = ({ task }) => {
   const { updateTask, deleteTask } = useTasks();
 
   const toggleStatus = async () => {
     const currentStatus = task.status || 'todo';
-    const newStatus = currentStatus === 'done' ? 'todo' : 'done';
+    const newStatus = getNextStatus(currentStatus);
 
     try {
       await updateTask(task.id, { status: newStatus });
@@ -61,12 +42,12 @@ const TaskItem = ({ task }) => {
       </div>
       <div className="task-meta">
         <span>Категория: {formatCategory(task.category)}</span>
-        <span>Статус: {task.status === 'done' ? '✅ Завершена' : '🟡 В работе'}</span>
+        <span>Статус: {formatStatus(task.status)}</span>
         <span>Создана: {formatDate(task.created_at)}</span>
       </div>
       <div className="task-actions">
         <button onClick={toggleStatus} className="btn btn-outline">
-          {task.status === 'done' ? 'Вернуть' : 'Завершить'}
+          {getStatusActionLabel(task.status)}
         </button>
         <button onClick={handleDelete} className="btn btn-danger">Удалить</button>
       </div>

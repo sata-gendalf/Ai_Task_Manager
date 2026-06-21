@@ -1,4 +1,4 @@
-# ER-модель базы данных AI Task Assistant
+# ER-модель базы данных Task Manager
 
 ## Описание
 
